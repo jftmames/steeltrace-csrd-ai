@@ -9,7 +9,6 @@ Arquitectura reproducible para cumplimiento CSRD/ESRS y AI Act con:
 - Observabilidad con SLOs p95
 
 ## Cómo ejecutar (resumen)
-El pipeline completo se ejecuta automáticamente desde la aplicación Streamlit para generar todos los artefactos de trazabilidad.
 1. Carga datos de ejemplo en `data/samples/`
 2. Valida schema + DQ → `contracts/`
 3. SHACL → `ontology/`
@@ -24,17 +23,8 @@ El pipeline completo se ejecuta automáticamente desde la aplicación Streamlit 
 - Código: MIT (LICENSE)
 - Documentación: CC BY 4.0 (LICENSE-CC-BY-4.0.txt)
 
-## Ejecutar el Reporte Interactivo (Streamlit) 🚀
+## Ejecutar en Binder
 
-Este PoC se lanza como una aplicación Streamlit. Para validar la aplicación:
+[![Launch Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jftmames/steeltrace-csrd-ai/HEAD?labpath=scripts%2Fsteeltrace_lab.ipynb&flush_cache=true) 
 
-1.  Abre el repositorio en **Codespaces** (o un entorno con Docker/Streamlit).
-2.  Instala las dependencias: `pip install -r requirements.txt`
-3.  Lanza la aplicación en el terminal: `streamlit run app.py`
-
-**Nota:** La aplicación tiene un botón **"Ejecutar Pipeline y Recargar Reportes"** que orquesta todos los pasos del flujo (`mcp_ingest.py` hasta `evidence_build.py`) para generar y mostrar los artefactos de cumplimiento (DQ, EEE-Score, SLO, Kappa).
-
----
-
-*(Puedes mantener el badge de Binder original si quieres ofrecer la opción de JupyterLab para inspeccionar el código, pero el enfoque principal es el reporte interactivo.)*
 
