@@ -53,12 +53,25 @@ def explain(kpis: dict):
       }
     }
 
+def run_raga():
+    logs = []
+    try:
+        kpis = compute_kpis()
+        Path("raga").mkdir(exist_ok=True)
+        Path("raga/kpis.json").write_text(json.dumps(kpis, indent=2, ensure_ascii=False))
+        Path("raga/explain.json").write_text(json.dumps(explain(kpis), indent=2, ensure_ascii=False))
+        logs.append("RAGA OK → raga/kpis.json, raga/explain.json")
+        return {"status": "ok", "logs": logs}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 def main():
-    kpis = compute_kpis()
-    Path("raga").mkdir(exist_ok=True)
-    Path("raga/kpis.json").write_text(json.dumps(kpis, indent=2, ensure_ascii=False))
-    Path("raga/explain.json").write_text(json.dumps(explain(kpis), indent=2, ensure_ascii=False))
-    print("RAGA OK → raga/kpis.json, raga/explain.json")
+    res = run_raga()
+    if res["status"] == "error":
+        print(res["message"])
+        exit(1)
+    for log in res["logs"]:
+        print(log)
 
 if __name__ == "__main__":
     main()

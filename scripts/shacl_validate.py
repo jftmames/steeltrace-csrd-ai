@@ -75,8 +75,9 @@ def run_shacl(data_graph: Graph, shape_path: Path, title: str) -> tuple[bool, st
     header = f"=== {title} ===\nconforms = {conforms}\n"
     return conforms, header + results_text + "\n"
 
-def main():
+def run_shacl_validation():
     OUT_VALIDATION.parent.mkdir(parents=True, exist_ok=True)
+    logs = []
 
     g = Graph()
     if ONTOLOGY_FILE.exists():
@@ -87,7 +88,7 @@ def main():
     g1 = ROOT / "data" / "normalized" / "ethics_2024-01.json"
     for p in [e1, s1, g1]:
         if not p.exists():
-            raise SystemExit(f"No existe {p}. Ejecuta primero mcp_ingest.py")
+            return {"status": "error", "message": f"No existe {p}. Ejecuta primero mcp_ingest.py"}
 
     materialize_e1(g, e1)
     materialize_s1(g, s1)
@@ -103,9 +104,20 @@ def main():
     OUT_VALIDATION.write_text(report, encoding="utf-8")
     g.serialize(destination=OUT_LINEAGE, format="turtle")
 
-    print("SHACL GLOBAL:", "OK" if all([c1,c2,c3]) else "CONSTRAINTS FAILED")
-    print(f"- Reporte: {OUT_VALIDATION}")
-    print(f"- Linaje RDF: {OUT_LINEAGE}")
+    status_msg = "OK" if all([c1,c2,c3]) else "CONSTRAINTS FAILED"
+    logs.append(f"SHACL GLOBAL: {status_msg}")
+    logs.append(f"- Reporte: {OUT_VALIDATION}")
+    logs.append(f"- Linaje RDF: {OUT_LINEAGE}")
+
+    return {"status": "ok", "logs": logs}
+
+def main():
+    res = run_shacl_validation()
+    if res["status"] == "error":
+        print(res["message"])
+        exit(1)
+    for log in res["logs"]:
+        print(log)
 
 if __name__ == "__main__":
     main()

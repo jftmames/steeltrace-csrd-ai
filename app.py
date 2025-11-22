@@ -1,17 +1,16 @@
 import streamlit as st
 import json
 from pathlib import Path
-import subprocess
 import os
 import pandas as pd
 from datetime import datetime
+import scripts.pipeline_run as pipeline_run
 
 # --- Configuración de Paths ---
 # Asegúrate de que el CWD es la raíz del repo
 ROOT_DIR = Path(__file__).parent.resolve()
 os.chdir(ROOT_DIR)
 
-PIPELINE_SCRIPT = ROOT_DIR / "scripts" / "pipeline_run.py"
 DQ_REPORT_FILE  = ROOT_DIR / "data" / "dq_report.json"
 KPI_FILE        = ROOT_DIR / "raga" / "kpis.json"
 EEE_REPORT_FILE = ROOT_DIR / "ops" / "gate_report.json"
@@ -36,16 +35,31 @@ def run_pipeline():
     st.info(f"Ejecutando pipeline completo... Esto tomará unos segundos.")
     
     try:
-        # Llama al script pipeline_run.py
-        result = subprocess.run(
-            ["python", str(PIPELINE_SCRIPT)],
-            capture_output=True, text=True, check=True
-        )
-        st.success("Pipeline ejecutado correctamente.")
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        st.error(f"El pipeline falló. Revisa los errores en la terminal.")
-        st.code(e.stderr)
+        # Llama a la función directamente en lugar de subprocess
+        result = pipeline_run.run_all_steps()
+
+        # Construye un string similar al stdout anterior para mostrar logs
+        output = []
+        all_ok = True
+        for step in result["steps"]:
+            status = "✅" if step["ok"] else "❌"
+            output.append(f"{status} {step['name']} ({step['duration_sec']:.2f}s)")
+            if step["stdout"]:
+                output.append(step["stdout"])
+            if not step["ok"]:
+                all_ok = False
+                output.append(f"ERROR in {step['name']}: {step['stderr']}")
+
+        if all_ok:
+            st.success("Pipeline ejecutado correctamente.")
+        else:
+            st.error("El pipeline falló en algunos pasos.")
+
+        return "\n".join(output)
+
+    except Exception as e:
+        st.error(f"El pipeline falló con una excepción inesperada.")
+        st.code(str(e))
         return None
 
 # --- Interfaz Streamlit ---
