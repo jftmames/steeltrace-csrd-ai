@@ -26,19 +26,37 @@ def validate_xml(xml_tree):
     schema = etree.XMLSchema(schema_doc)
     return schema.validate(xml_tree), schema.error_log
 
-def main():
-    OUT_XML.parent.mkdir(parents=True, exist_ok=True)
-    xml = build_xml()
-    tree = etree.ElementTree(xml)
-    ok, errors = validate_xml(tree)
-    tree.write(str(OUT_XML), encoding="utf-8", xml_declaration=True, pretty_print=True)
+def run_xbrl():
+    logs = []
+    try:
+        OUT_XML.parent.mkdir(parents=True, exist_ok=True)
+        xml = build_xml()
+        tree = etree.ElementTree(xml)
+        ok, errors = validate_xml(tree)
+        tree.write(str(OUT_XML), encoding="utf-8", xml_declaration=True, pretty_print=True)
 
-    if ok:
-        VAL_LOG.write_text("XBRL basic schema validation: OK\n", encoding="utf-8")
-        print("XBRL OK →", OUT_XML)
-    else:
-        VAL_LOG.write_text("XBRL validation: FAILED\n" + str(errors), encoding="utf-8")
-        print("XBRL FAILED. See", VAL_LOG)
+        if ok:
+            VAL_LOG.write_text("XBRL basic schema validation: OK\n", encoding="utf-8")
+            logs.append(f"XBRL OK → {OUT_XML}")
+        else:
+            VAL_LOG.write_text("XBRL validation: FAILED\n" + str(errors), encoding="utf-8")
+            logs.append(f"XBRL FAILED. See {VAL_LOG}")
+            return {"status": "error", "message": "XBRL validation failed", "logs": logs}
+
+        return {"status": "ok", "logs": logs}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def main():
+    res = run_xbrl()
+    if res["status"] == "error":
+        print(res["message"])
+        if "logs" in res:
+             for log in res["logs"]:
+                print(log)
+        exit(1)
+    for log in res["logs"]:
+        print(log)
 
 if __name__ == "__main__":
     main()

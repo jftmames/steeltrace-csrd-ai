@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import pandas as pd
 from jsonschema import Draft202012Validator
-from utils_hash import sha256_file, sha256_json, write_json
+from scripts.utils_hash import sha256_file, sha256_json, write_json
 import yaml # pyyaml es necesario para load_yaml
 
 # -------- Config --------
@@ -106,11 +106,12 @@ def json_load(path: str) -> dict | list:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 # -------- Main --------
-def main():
+def run_ingest():
     dq_rules = load_yaml(DQ_RULES_FILE)
 
     normalized_paths = []
     dq_summary = {}
+    logs = []
 
     for domain, cfg in SAMPLES.items():
         src = Path(cfg["input"])
@@ -119,9 +120,13 @@ def main():
         dst.parent.mkdir(parents=True, exist_ok=True)
 
         # 1) Cargar datos
-        records = json_load(src)
+        try:
+            records = json_load(src)
+        except FileNotFoundError:
+             return {"status": "error", "message": f"File not found: {src}"}
+
         if not isinstance(records, list):
-            raise ValueError(f"{src} debe ser una lista de objetos JSON")
+             return {"status": "error", "message": f"{src} debe ser una lista de objetos JSON"}
 
         # 2) Validar JSON Schema
         schema = json_load(sch)
@@ -179,11 +184,22 @@ def main():
     }
     write_json("data/dq_report.json", dq_report)
 
-    print("Ingesta/DQ completada.")
-    print("data/dq_report.json escrito.")
-    print("data/lineage.jsonl escrito.")
+    logs.append("Ingesta/DQ completada.")
+    logs.append("data/dq_report.json escrito.")
+    logs.append("data/lineage.jsonl escrito.")
     for p in normalized_paths:
-        print("OK →", p)
+        logs.append(f"OK → {p}")
+
+    return {"status": "ok", "logs": logs}
+
+def main():
+    result = run_ingest()
+    if result["status"] == "error":
+        print(f"Error: {result['message']}")
+        exit(1)
+    else:
+        for log in result["logs"]:
+            print(log)
 
 if __name__ == "__main__":
     main()

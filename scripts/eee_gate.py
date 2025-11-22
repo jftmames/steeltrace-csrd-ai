@@ -69,67 +69,81 @@ def decision(score: float, th: float) -> str:
     if score >= (th - 0.1): return "review"
     return "block"
 
-def main():
-    cfg = load_yaml(CFG)
-    th  = cfg["eee_gate"]["threshold_score"]
-    w   = cfg["eee_gate"]["weights"]
+def run_gate():
+    logs = []
+    try:
+        cfg = load_yaml(CFG)
+        th  = cfg["eee_gate"]["threshold_score"]
+        w   = cfg["eee_gate"]["weights"]
 
-    # cargar explicaciones y kpis
-    kpis = json.loads(KPIS.read_text(encoding="utf-8"))
-    explain = json.loads(EXPL.read_text(encoding="utf-8"))
+        # cargar explicaciones y kpis
+        kpis = json.loads(KPIS.read_text(encoding="utf-8"))
+        explain = json.loads(EXPL.read_text(encoding="utf-8"))
 
-    # componentes
-    ev_score, ev_meta = evidence_component(cfg)
-    ex_score, ex_meta = explicit_component(explain)
-    ep_score, ep_meta = epistemic_component(explain)
+        # componentes
+        ev_score, ev_meta = evidence_component(cfg)
+        ex_score, ex_meta = explicit_component(explain)
+        ep_score, ep_meta = epistemic_component(explain)
 
-    eee_score = round(
-        w["epistemic"]*ep_score + w["explicit"]*ex_score + w["evidence"]*ev_score, 4
-    )
+        eee_score = round(
+            w["epistemic"]*ep_score + w["explicit"]*ex_score + w["evidence"]*ev_score, 4
+        )
 
-    # decisión por DP (simple: aplica el mismo score; en real podrías granularizar por DP)
-    details = []
-    for dp in kpis.keys():
-        details.append({
-            "dp": dp,
-            "epistemic": ep_score,
-            "explicit": ex_score,
-            "evidence": ev_score,
+        # decisión por DP (simple: aplica el mismo score; en real podrías granularizar por DP)
+        details = []
+        for dp in kpis.keys():
+            details.append({
+                "dp": dp,
+                "epistemic": ep_score,
+                "explicit": ex_score,
+                "evidence": ev_score,
+                "eee_score": eee_score,
+                "decision": decision(eee_score, th)
+            })
+
+        report = {
+            "generated_utc": datetime.utcnow().isoformat()+"Z",
+            "weights": w,
+            "components": {
+                "epistemic": ep_score,
+                "explicit": ex_score,
+                "evidence": ev_score
+            },
             "eee_score": eee_score,
-            "decision": decision(eee_score, th)
-        })
+            "threshold": th,
+            "global_decision": decision(eee_score, th),
+            "meta": {
+                "evidence": ev_meta,
+                "explicit": ex_meta,
+                "epistemic": ep_meta
+            },
+            "details": details
+        }
 
-    report = {
-        "generated_utc": datetime.utcnow().isoformat()+"Z",
-        "weights": w,
-        "components": {
-            "epistemic": ep_score,
-            "explicit": ex_score,
-            "evidence": ev_score
-        },
-        "eee_score": eee_score,
-        "threshold": th,
-        "global_decision": decision(eee_score, th),
-        "meta": {
-            "evidence": ev_meta,
-            "explicit": ex_meta,
-            "epistemic": ep_meta
-        },
-        "details": details
-    }
+        Path("ops").mkdir(exist_ok=True)
+        Path("eee").mkdir(exist_ok=True)
+        Path("ops/gate_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
+        # resumen compacto para auditoría
+        Path("eee/eee_report.json").write_text(json.dumps({
+            "utc": report["generated_utc"],
+            "eee_score": eee_score,
+            "decision": report["global_decision"]
+        }, indent=2, ensure_ascii=False))
 
-    Path("ops").mkdir(exist_ok=True)
-    Path("eee").mkdir(exist_ok=True)
-    Path("ops/gate_report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
-    # resumen compacto para auditoría
-    Path("eee/eee_report.json").write_text(json.dumps({
-        "utc": report["generated_utc"],
-        "eee_score": eee_score,
-        "decision": report["global_decision"]
-    }, indent=2, ensure_ascii=False))
+        logs.append(f"EEE-Score: {eee_score} → {report['global_decision']}")
+        logs.append("→ ops/gate_report.json, eee/eee_report.json")
 
-    print(f"EEE-Score: {eee_score} → {report['global_decision']}")
-    print("→ ops/gate_report.json, eee/eee_report.json")
+        return {"status": "ok", "logs": logs}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def main():
+    res = run_gate()
+    if res["status"] == "error":
+        print(res["message"])
+        exit(1)
+    for log in res["logs"]:
+        print(log)
 
 if __name__ == "__main__":
     main()
