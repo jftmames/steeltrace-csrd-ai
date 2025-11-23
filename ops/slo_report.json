@@ -1,77 +1,77 @@
 {
-  "utc": "2025-11-23T18:31:04.929205Z",
+  "utc": "2025-11-23T19:41:08.703165Z",
   "agg": {
     "MCP.ingest": {
-      "count": 2,
-      "p95_sec": 1.07,
-      "mean_sec": 0.6136
+      "count": 3,
+      "p95_sec": 2.1075,
+      "mean_sec": 1.1116
     },
     "SHACL.validate": {
-      "count": 2,
-      "p95_sec": 0.4997,
-      "mean_sec": 0.2864
+      "count": 3,
+      "p95_sec": 0.5498,
+      "mean_sec": 0.3742
     },
     "RAGA.compute": {
-      "count": 2,
+      "count": 3,
       "p95_sec": 0.0601,
-      "mean_sec": 0.0601
+      "mean_sec": 0.0587
     },
     "EEE.gate": {
-      "count": 2,
-      "p95_sec": 0.0781,
-      "mean_sec": 0.0636
+      "count": 3,
+      "p95_sec": 0.0794,
+      "mean_sec": 0.0689
     },
     "XBRL.generate": {
-      "count": 2,
-      "p95_sec": 0.0827,
-      "mean_sec": 0.0814
+      "count": 3,
+      "p95_sec": 0.1187,
+      "mean_sec": 0.0938
     },
     "EVIDENCE.build": {
-      "count": 2,
+      "count": 3,
       "p95_sec": 0.0973,
-      "mean_sec": 0.0748
+      "mean_sec": 0.0691
     }
   },
   "last_run": [
     {
       "name": "MCP.ingest",
       "ok": true,
-      "duration_sec": 1.0700182390000919,
+      "duration_sec": 2.107545611999967,
       "stdout": "Ingesta/DQ completada.\ndata/dq_report.json escrito.\ndata/lineage.jsonl escrito.\nOK → data/normalized/energy_2024-01.json\nOK → data/normalized/hr_2024-01.json\nOK → data/normalized/ethics_2024-01.json\n",
       "stderr": "/app/scripts/mcp_ingest.py:166: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"utc\": datetime.utcnow().isoformat() + \"Z\"\n"
     },
     {
       "name": "SHACL.validate",
       "ok": true,
-      "duration_sec": 0.49974883100003353,
+      "duration_sec": 0.5497651680000217,
       "stdout": "SHACL GLOBAL: CONSTRAINTS FAILED\n- Reporte: ontology/validation.log\n- Linaje RDF: ontology/linaje.ttl\n",
       "stderr": "/app/scripts/shacl_validate.py:101: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  ts = datetime.utcnow().isoformat() + \"Z\"\n"
     },
     {
       "name": "RAGA.compute",
       "ok": true,
-      "duration_sec": 0.060136003000025084,
+      "duration_sec": 0.05585383900006491,
       "stdout": "RAGA OK → raga/kpis.json, raga/explain.json\n",
       "stderr": ""
     },
     {
       "name": "EEE.gate",
       "ok": true,
-      "duration_sec": 0.07810802699998476,
+      "duration_sec": 0.07943827500002953,
       "stdout": "EEE-Score: 1.0 → publish\n→ ops/gate_report.json, eee/eee_report.json\n",
       "stderr": "/app/scripts/eee_gate.py:103: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"generated_utc\": datetime.utcnow().isoformat()+\"Z\",\n"
     },
     {
       "name": "XBRL.generate",
       "ok": true,
-      "duration_sec": 0.08271674200000234,
+      "duration_sec": 0.11868256399998245,
       "stdout": "XBRL OK → xbrl/informe.xbrl\n",
       "stderr": ""
     },
     {
       "name": "EVIDENCE.build",
       "ok": true,
-      "duration_sec": 0.052255833000003804,
+      "duration_sec": 0.05775345000006382,
       "stdout": "Evidence manifest → evidence/evidence_manifest.json\n",
       "stderr": "/app/scripts/evidence_build.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  man[\"created_utc\"] = datetime.utcnow().isoformat() + \"Z\"\n/app/scripts/evidence_build.py:27: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"ts_utc\": datetime.utcnow().isoformat() + \"Z\",\n"
     }
