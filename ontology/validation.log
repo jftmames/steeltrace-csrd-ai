@@ -1,0 +1,33 @@
+[2025-11-23T18:31:04.609530Z] GLOBAL_CONFORMS = False
+
+=== SHACL E1 ===
+conforms = False
+Validation Report
+Conforms: False
+Results (2):
+Constraint Violation in DatatypeConstraintComponent (http://www.w3.org/ns/shacl#DatatypeConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:decimal ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:minInclusive Literal("0", datatype=xsd:integer) ; sh:path ex:kwh ]
+	Focus Node: <http://example.com/esrs#E1Record/2>
+	Value Node: Literal("9800", datatype=xsd:decimal)
+	Result Path: ex:kwh
+	Message: Value is not Literal with datatype xsd:decimal
+Constraint Violation in DatatypeConstraintComponent (http://www.w3.org/ns/shacl#DatatypeConstraintComponent):
+	Severity: sh:Violation
+	Source Shape: [ sh:datatype xsd:decimal ; sh:minCount Literal("1", datatype=xsd:integer) ; sh:minInclusive Literal("0", datatype=xsd:integer) ; sh:path ex:kwh ]
+	Focus Node: <http://example.com/esrs#E1Record/1>
+	Value Node: Literal("12300", datatype=xsd:decimal)
+	Result Path: ex:kwh
+	Message: Value is not Literal with datatype xsd:decimal
+
+
+=== SHACL S1 ===
+conforms = True
+Validation Report
+Conforms: True
+
+
+=== SHACL G1 ===
+conforms = True
+Validation Report
+Conforms: True

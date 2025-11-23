@@ -1,0 +1,262 @@
+{
+  "domains": {
+    "energy": {
+      "source": "data/samples/energy_2024-01.json",
+      "schema": "contracts/erp_energy.schema.json",
+      "records_total": 2,
+      "records_valid": 2,
+      "schema_errors": [],
+      "dq": {
+        "by_rule": {
+          "completeness": [
+            {
+              "rule": {
+                "field": "kwh",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "period_start",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "period_end",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "validity": [
+            {
+              "rule": {
+                "field": "period_start",
+                "rule": "is_date"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "period_end",
+                "rule": "is_date"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "kwh",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "consistency": [
+            {
+              "rule": {
+                "rule": "period_start <= period_end"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "timeliness": [
+            {
+              "rule": {
+                "field": "period_end",
+                "rule": "within_month('2024-01')"
+              },
+              "pass_rate": 1.0
+            }
+          ]
+        },
+        "aggregate": {
+          "completeness": 1.0,
+          "validity": 1.0,
+          "consistency": 1.0,
+          "timeliness": 1.0,
+          "dq_pass": true
+        }
+      }
+    },
+    "hr": {
+      "source": "data/samples/hr_2024-01.json",
+      "schema": "contracts/hr_people.schema.json",
+      "records_total": 1,
+      "records_valid": 1,
+      "schema_errors": [],
+      "dq": {
+        "by_rule": {
+          "completeness": [
+            {
+              "rule": {
+                "field": "employees_start",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "employees_end",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "exits",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "validity": [
+            {
+              "rule": {
+                "field": "period",
+                "rule": "is_yyyy_mm"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "employees_start",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "employees_end",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "exits",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "consistency": [
+            {
+              "rule": {
+                "rule": "employees_end <= employees_start + 1000"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "timeliness": [
+            {
+              "rule": {
+                "field": "period",
+                "rule": "equals('2024-01')"
+              },
+              "pass_rate": 1.0
+            }
+          ]
+        },
+        "aggregate": {
+          "completeness": 1.0,
+          "validity": 1.0,
+          "consistency": 1.0,
+          "timeliness": 1.0,
+          "dq_pass": true
+        }
+      }
+    },
+    "ethics": {
+      "source": "data/samples/ethics_2024-01.json",
+      "schema": "contracts/ethics_cases.schema.json",
+      "records_total": 1,
+      "records_valid": 1,
+      "schema_errors": [],
+      "dq": {
+        "by_rule": {
+          "completeness": [
+            {
+              "rule": {
+                "field": "cases_opened",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "cases_closed",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "closed_with_resolution",
+                "rule": "not_null"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "validity": [
+            {
+              "rule": {
+                "field": "period",
+                "rule": "is_yyyy_mm"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "cases_opened",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "cases_closed",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            },
+            {
+              "rule": {
+                "field": "closed_with_resolution",
+                "rule": ">=0"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "consistency": [
+            {
+              "rule": {
+                "rule": "closed_with_resolution <= cases_closed"
+              },
+              "pass_rate": 1.0
+            }
+          ],
+          "timeliness": [
+            {
+              "rule": {
+                "field": "period",
+                "rule": "equals('2024-01')"
+              },
+              "pass_rate": 1.0
+            }
+          ]
+        },
+        "aggregate": {
+          "completeness": 1.0,
+          "validity": 1.0,
+          "consistency": 1.0,
+          "timeliness": 1.0,
+          "dq_pass": true
+        }
+      }
+    }
+  },
+  "dq_pass": true
+}

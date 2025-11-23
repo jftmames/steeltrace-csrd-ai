@@ -1,30 +1,88 @@
-# STEELTRACE™ CSRD+AI — MVP académico (PoC)
+# STEELTRACE™ | CSRD+AI Compliance MVP
 
-Arquitectura reproducible para cumplimiento CSRD/ESRS y AI Act con:
-- Ontología + SHACL (validación semántica)
-- RAGA (razonamiento, KPIs, explicaciones)
-- EEE-Gate (evidencia o no pasa)
-- XBRL/FEUE (salida verificable)
-- WORM + TSA (evidencias con valor legal)
-- Observabilidad con SLOs p95
+> **Automated Sustainability Reporting with Auditable AI Governance**
 
-## Cómo ejecutar (resumen)
-1. Carga datos de ejemplo en `data/samples/`
-2. Valida schema + DQ → `contracts/`
-3. SHACL → `ontology/`
-4. KPIs → `raga/`
-5. Gate → `ops/`
-6. XBRL → `xbrl/`
-7. Evidencias → `evidence/`
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://streamlit.io)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-> Este repo es educativo/investigación. No es despliegue productivo.
+## 📋 Overview
 
-## Licencias
-- Código: MIT (LICENSE)
-- Documentación: CC BY 4.0 (LICENSE-CC-BY-4.0.txt)
+**STEELTRACE™** is a Proof of Concept (PoC) designed to demonstrate how **Generative AI** can be safely integrated into **CSRD (Corporate Sustainability Reporting Directive)** workflows.
 
-## Ejecutar en Binder
+This MVP showcases a fully automated pipeline that ingests raw enterprise data, validates it against semantic rules (SHACL), generates explainable metrics (RAGA), and produces a legally compliant XBRL report, all while maintaining a cryptographic audit trail.
 
-[![Launch Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jftmames/steeltrace-csrd-ai/HEAD?labpath=scripts%2Fsteeltrace_lab.ipynb&flush_cache=true) 
+### Key Features
 
+*   **🛡️ Multi-Agent Architecture**: Modular pipeline with specialized agents for Ingestion, Validation, Calculation, and Reporting.
+*   **🧠 RAGA (Retrieval-Augmented Generation with Audit)**: AI explanations for every KPI, grounded in ESRS regulations.
+*   **⚖️ EEE-Gate (Epistemic-Explicit-Evidence)**: A novel governance gate that blocks AI hallucinations from entering the final report.
+*   **🔗 Merkle Audit Trail**: Every data point and decision is hashed and linked, creating an immutable chain of custody.
+*   **📊 XBRL Generation**: Automatic generation of digital reports compliant with ESEF/taxonomy standards.
 
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.10 or higher
+- [Poetry](https://python-poetry.org/) (optional, or standard pip)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-org/steeltrace-mvp.git
+    cd steeltrace-mvp
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Run the application:**
+    ```bash
+    streamlit run app.py
+    ```
+
+---
+
+## 🏗️ Architecture
+
+The solution follows a strict linear pipeline orchestrated by `scripts/pipeline_run.py`:
+
+1.  **MCP.ingest**: Normalizes raw JSON inputs (Energy, HR, Ethics) and checks Data Quality (completeness, validity).
+2.  **SHACL.validate**: Maps data to an RDF Knowledge Graph and validates against ESRS ontologies (E1, S1, G1).
+3.  **RAGA.compute**: Calculates sustainability KPIs (e.g., CO2e, Gender Pay Gap) and generates AI-driven explanations.
+4.  **EEE.gate**: Evaluates the confidence of the AI's output. Only high-confidence outputs pass to the final report.
+5.  **XBRL.generate**: serializes the validated data into the official XBRL format.
+6.  **EVIDENCE.build**: Bundles all logs and artifacts into a Merkle Tree for external auditing.
+
+---
+
+## 📂 Project Structure
+
+```
+├── app.py                 # Streamlit UI Entry Point
+├── contracts/             # Data Contracts (Schemas, SHACL shapes, DQ rules)
+├── data/                  # Input samples and Normalized data
+├── ontology/              # ESRS Ontology (OWL) and RDF Knowledge Graph
+├── ops/                   # Operational logs (SLO, Gate Reports)
+├── rag/                   # Vector Index for RAGA (ESRS regulations)
+├── raga/                  # Generated KPIs and Explanations
+├── scripts/               # Python processing modules
+│   ├── pipeline_run.py    # Orchestrator
+│   ├── mcp_ingest.py      # Data Ingestion
+│   ├── ...
+└── xbrl/                  # Generated XBRL reports and Schemas
+```
+
+## 🤝 Contribution
+
+This is an academic/consulting MVP. Contributions to improve the ontology or add new ESRS modules are welcome.
+
+## 📄 License
+
+This project is licensed under the **CC BY 4.0** license.

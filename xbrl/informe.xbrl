@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:Report xmlns:ns0="http://example.com/xbrl" version="0.1">
+  <ns0:Entity>ACME</ns0:Entity>
+  <ns0:Period>2024-01</ns0:Period>
+  <ns0:KPI>
+    <ns0:Id>E1-1.total_co2e_tons</ns0:Id>
+    <ns0:Value>4.811</ns0:Value>
+  </ns0:KPI>
+  <ns0:KPI>
+    <ns0:Id>S1-1.employee_turnover</ns0:Id>
+    <ns0:Value>0.0404</ns0:Value>
+  </ns0:KPI>
+  <ns0:KPI>
+    <ns0:Id>G1-1.resolution_rate_pct</ns0:Id>
+    <ns0:Value>75.0</ns0:Value>
+  </ns0:KPI>
+</ns0:Report>

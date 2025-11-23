@@ -1,0 +1,79 @@
+{
+  "utc": "2025-11-23T18:31:04.929205Z",
+  "agg": {
+    "MCP.ingest": {
+      "count": 2,
+      "p95_sec": 1.07,
+      "mean_sec": 0.6136
+    },
+    "SHACL.validate": {
+      "count": 2,
+      "p95_sec": 0.4997,
+      "mean_sec": 0.2864
+    },
+    "RAGA.compute": {
+      "count": 2,
+      "p95_sec": 0.0601,
+      "mean_sec": 0.0601
+    },
+    "EEE.gate": {
+      "count": 2,
+      "p95_sec": 0.0781,
+      "mean_sec": 0.0636
+    },
+    "XBRL.generate": {
+      "count": 2,
+      "p95_sec": 0.0827,
+      "mean_sec": 0.0814
+    },
+    "EVIDENCE.build": {
+      "count": 2,
+      "p95_sec": 0.0973,
+      "mean_sec": 0.0748
+    }
+  },
+  "last_run": [
+    {
+      "name": "MCP.ingest",
+      "ok": true,
+      "duration_sec": 1.0700182390000919,
+      "stdout": "Ingesta/DQ completada.\ndata/dq_report.json escrito.\ndata/lineage.jsonl escrito.\nOK → data/normalized/energy_2024-01.json\nOK → data/normalized/hr_2024-01.json\nOK → data/normalized/ethics_2024-01.json\n",
+      "stderr": "/app/scripts/mcp_ingest.py:166: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"utc\": datetime.utcnow().isoformat() + \"Z\"\n"
+    },
+    {
+      "name": "SHACL.validate",
+      "ok": true,
+      "duration_sec": 0.49974883100003353,
+      "stdout": "SHACL GLOBAL: CONSTRAINTS FAILED\n- Reporte: ontology/validation.log\n- Linaje RDF: ontology/linaje.ttl\n",
+      "stderr": "/app/scripts/shacl_validate.py:101: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  ts = datetime.utcnow().isoformat() + \"Z\"\n"
+    },
+    {
+      "name": "RAGA.compute",
+      "ok": true,
+      "duration_sec": 0.060136003000025084,
+      "stdout": "RAGA OK → raga/kpis.json, raga/explain.json\n",
+      "stderr": ""
+    },
+    {
+      "name": "EEE.gate",
+      "ok": true,
+      "duration_sec": 0.07810802699998476,
+      "stdout": "EEE-Score: 1.0 → publish\n→ ops/gate_report.json, eee/eee_report.json\n",
+      "stderr": "/app/scripts/eee_gate.py:103: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"generated_utc\": datetime.utcnow().isoformat()+\"Z\",\n"
+    },
+    {
+      "name": "XBRL.generate",
+      "ok": true,
+      "duration_sec": 0.08271674200000234,
+      "stdout": "XBRL OK → xbrl/informe.xbrl\n",
+      "stderr": ""
+    },
+    {
+      "name": "EVIDENCE.build",
+      "ok": true,
+      "duration_sec": 0.052255833000003804,
+      "stdout": "Evidence manifest → evidence/evidence_manifest.json\n",
+      "stderr": "/app/scripts/evidence_build.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  man[\"created_utc\"] = datetime.utcnow().isoformat() + \"Z\"\n/app/scripts/evidence_build.py:27: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  \"ts_utc\": datetime.utcnow().isoformat() + \"Z\",\n"
+    }
+  ]
+}

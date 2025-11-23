@@ -1,0 +1,46 @@
+{
+  "run_id": "2025Q1-ACME-0001",
+  "artifacts": [
+    {
+      "path": "raga/kpis.json",
+      "sha256": "a617729b51c4f5e161f72c30700bee4ba8393b59596ff6b98e47dfb72f7e1695"
+    },
+    {
+      "path": "raga/explain.json",
+      "sha256": "bad451a2cd794ad5562af49c48b8af6d4f0fdb4b175f3d237f9ffa44c7708ad6"
+    },
+    {
+      "path": "ontology/validation.log",
+      "sha256": "1af663909fc840b5151bae1fabd1f7545d25c57bc0dcc66744f56ed097775c68"
+    },
+    {
+      "path": "ontology/linaje.ttl",
+      "sha256": "4befe00955a98de180c3268b43bd3a6bfa8c7ab93180f497c77282fdc730e157"
+    },
+    {
+      "path": "ops/gate_report.json",
+      "sha256": "7e8040a419d665c1f3f0899a51f557e47f60fa95ba898b8297338c0811f243a6"
+    },
+    {
+      "path": "eee/eee_report.json",
+      "sha256": "ddfe6f1fbb204bbc47cd2f8e759dfff1cd1252eab783b8c6ab1a4c7e70ad8831"
+    },
+    {
+      "path": "xbrl/informe.xbrl",
+      "sha256": "62e2c6957d374b35ef8023c15641af56f53fe61ca9ab5a4979b69514dea3dfd5"
+    },
+    {
+      "path": "xbrl/validation.log",
+      "sha256": "27073af5a32a23be465d8ff13e14fe59cd0990e74b5a9fee093eb9a1ab0c11ca"
+    }
+  ],
+  "merkle_root": "SHA256:f2ccdf466327dfe11ae970ac4ed3eb28e97cfab11163cd6a3c42de9b669349fc",
+  "created_utc": "2025-11-23T18:31:04.919241Z",
+  "tsa_tokens": [
+    {
+      "tsa": "SIMULATED-TSA",
+      "ts_utc": "2025-11-23T18:31:04.919298Z",
+      "merkle_root": "SHA256:f2ccdf466327dfe11ae970ac4ed3eb28e97cfab11163cd6a3c42de9b669349fc"
+    }
+  ]
+}
