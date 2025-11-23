@@ -1,0 +1,105 @@
+@prefix ex: <http://example.com/esrs#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.com/esrs#E1Record/1> a ex:E1Record ;
+    ex:companyId "ACME"^^xsd:string ;
+    ex:emissionFactor 0.231 ;
+    ex:hasEvidence <http://example.com/esrs#E1Record/1/evidence/1> ;
+    ex:kwh 12300.0 ;
+    ex:periodEnd "2024-01-31"^^xsd:date ;
+    ex:periodStart "2024-01-01"^^xsd:date .
+
+<http://example.com/esrs#E1Record/2> a ex:E1Record ;
+    ex:companyId "ACME"^^xsd:string ;
+    ex:emissionFactor 0.201 ;
+    ex:hasEvidence <http://example.com/esrs#E1Record/2/evidence/1> ;
+    ex:kwh 9800.0 ;
+    ex:periodEnd "2024-01-31"^^xsd:date ;
+    ex:periodStart "2024-01-01"^^xsd:date .
+
+ex:Entidad a owl:Class .
+
+<http://example.com/esrs#G1Record/1> a ex:G1Record ;
+    ex:casesClosed 4 ;
+    ex:casesOpened 5 ;
+    ex:closedWithResolution 3 ;
+    ex:companyId "ACME"^^xsd:string ;
+    ex:hasEvidence <http://example.com/esrs#G1Record/1/evidence/1> ;
+    ex:period "2024-01"^^xsd:string .
+
+ex:KPI a owl:Class .
+
+<http://example.com/esrs#S1Record/1> a ex:S1Record ;
+    ex:companyId "ACME"^^xsd:string ;
+    ex:employeesEnd 98 ;
+    ex:employeesStart 100 ;
+    ex:exits 4 ;
+    ex:hasEvidence <http://example.com/esrs#S1Record/1/evidence/1> ;
+    ex:period "2024-01"^^xsd:string .
+
+ex:casesClosed a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:casesOpened a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:closedWithResolution a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:companyId a owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+
+ex:emissionFactor a owl:DatatypeProperty ;
+    rdfs:range xsd:decimal .
+
+ex:employeesEnd a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:employeesStart a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:evidencePath a owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+
+ex:exits a owl:DatatypeProperty ;
+    rdfs:range xsd:integer .
+
+ex:hasEvidence a owl:ObjectProperty ;
+    rdfs:range ex:Evidencia .
+
+ex:kwh a owl:DatatypeProperty ;
+    rdfs:range xsd:decimal .
+
+ex:period a owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+
+ex:periodEnd a owl:DatatypeProperty ;
+    rdfs:range xsd:date .
+
+ex:periodStart a owl:DatatypeProperty ;
+    rdfs:range xsd:date .
+
+ex:sha256 a owl:DatatypeProperty ;
+    rdfs:range xsd:string .
+
+<http://example.com/esrs#E1Record/1/evidence/1> a ex:Evidencia ;
+    ex:evidencePath "data/normalized/energy_2024-01.json"^^xsd:string .
+
+<http://example.com/esrs#E1Record/2/evidence/1> a ex:Evidencia ;
+    ex:evidencePath "data/normalized/energy_2024-01.json"^^xsd:string .
+
+ex:G1Record a owl:Class .
+
+<http://example.com/esrs#G1Record/1/evidence/1> a ex:Evidencia ;
+    ex:evidencePath "data/normalized/ethics_2024-01.json"^^xsd:string .
+
+ex:S1Record a owl:Class .
+
+<http://example.com/esrs#S1Record/1/evidence/1> a ex:Evidencia ;
+    ex:evidencePath "data/normalized/hr_2024-01.json"^^xsd:string .
+
+ex:E1Record a owl:Class .
+
+ex:Evidencia a owl:Class .

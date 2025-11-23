@@ -1,0 +1,92 @@
+{
+  "generated_utc": "2025-11-23T18:31:04.781762Z",
+  "weights": {
+    "epistemic": 0.4,
+    "explicit": 0.3,
+    "evidence": 0.3
+  },
+  "components": {
+    "epistemic": 1.0,
+    "explicit": 1.0,
+    "evidence": 1.0
+  },
+  "eee_score": 1.0,
+  "threshold": 0.7,
+  "global_decision": "publish",
+  "meta": {
+    "evidence": {
+      "artifacts_present": 3,
+      "artifacts_total": 3
+    },
+    "explicit": {
+      "details": [
+        {
+          "dp": "E1-1.total_co2e_tons",
+          "hyp": 1.0,
+          "ev": 1.0,
+          "cit": 1.0,
+          "score": 1.0
+        },
+        {
+          "dp": "S1-1.employee_turnover",
+          "hyp": 1.0,
+          "ev": 1.0,
+          "cit": 1.0,
+          "score": 1.0
+        },
+        {
+          "dp": "G1-1.resolution_rate_pct",
+          "hyp": 1.0,
+          "ev": 1.0,
+          "cit": 1.0,
+          "score": 1.0
+        }
+      ]
+    },
+    "epistemic": {
+      "details": [
+        {
+          "dp": "E1-1.total_co2e_tons",
+          "residual": 0.0,
+          "score": 1.0
+        },
+        {
+          "dp": "S1-1.employee_turnover",
+          "residual": 0.0,
+          "score": 1.0
+        },
+        {
+          "dp": "G1-1.resolution_rate_pct",
+          "residual": 0.0,
+          "score": 1.0
+        }
+      ]
+    }
+  },
+  "details": [
+    {
+      "dp": "E1-1.total_co2e_tons",
+      "epistemic": 1.0,
+      "explicit": 1.0,
+      "evidence": 1.0,
+      "eee_score": 1.0,
+      "decision": "publish"
+    },
+    {
+      "dp": "S1-1.employee_turnover",
+      "epistemic": 1.0,
+      "explicit": 1.0,
+      "evidence": 1.0,
+      "eee_score": 1.0,
+      "decision": "publish"
+    },
+    {
+      "dp": "G1-1.resolution_rate_pct",
+      "epistemic": 1.0,
+      "explicit": 1.0,
+      "evidence": 1.0,
+      "eee_score": 1.0,
+      "decision": "publish"
+    }
+  ]
+}
