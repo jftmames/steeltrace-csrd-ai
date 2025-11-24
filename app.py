@@ -7,11 +7,22 @@ import sys
 import pandas as pd
 import shutil
 import time
-from datetime import datetime  # <--- ESTA ERA LA LÍNEA QUE FALTABA
+from datetime import datetime
+
+# --- 1. CONFIGURACIÓN INICIAL (Debe ser lo primero) ---
+st.set_page_config(
+    layout="wide",
+    page_title="STEELTRACE™ | Auditor Console",
+    page_icon="🛡️",
+    initial_sidebar_state="expanded"
+)
 
 # --- Configuración de Paths ---
 ROOT_DIR = Path(__file__).parent.resolve()
-os.chdir(ROOT_DIR)
+try:
+    os.chdir(ROOT_DIR)
+except Exception:
+    pass
 
 PIPELINE_SCRIPT = ROOT_DIR / "scripts" / "pipeline_run.py"
 DQ_REPORT_FILE  = ROOT_DIR / "data" / "dq_report.json"
@@ -21,8 +32,8 @@ SLO_REPORT_FILE = ROOT_DIR / "ops" / "slo_report.json"
 HITL_REPORT_FILE = ROOT_DIR / "ops" / "hitl_kappa.json"
 EXPLAIN_FILE    = ROOT_DIR / "raga" / "explain.json"
 
-# Directorios a limpiar en Reset
-DIRS_TO_CLEAN = ["data/normalized", "ops", "raga", "xbrl", "evidence", "eee", "ontology"]
+# Directorios críticos que SIEMPRE deben existir
+DIRS_TO_MANAGE = ["data/normalized", "ops", "raga", "xbrl", "evidence", "eee", "ontology"]
 
 def load_json(path: Path):
     try:
@@ -32,26 +43,40 @@ def load_json(path: Path):
         return None
 
 def reset_environment():
-    """Limpia los archivos generados para reiniciar la demo."""
-    for d in DIRS_TO_CLEAN:
+    """Limpia y REGENERA la estructura de carpetas."""
+    # 1. Limpiar contenido existente
+    for d in DIRS_TO_MANAGE:
         p = ROOT_DIR / d
         if p.exists() and p.is_dir():
-             # Mantenemos la carpeta pero borramos contenido para no romper estructuras
              for item in p.iterdir():
                  if item.is_file() and item.name != ".gitkeep":
-                     item.unlink()
+                     try: item.unlink()
+                     except: pass
                  elif item.is_dir():
-                     shutil.rmtree(item)
-    
-    # Archivos sueltos específicos
-    if (ROOT_DIR / "data" / "dq_report.json").exists(): (ROOT_DIR / "data" / "dq_report.json").unlink()
-    if (ROOT_DIR / "data" / "lineage.jsonl").exists(): (ROOT_DIR / "data" / "lineage.jsonl").unlink()
+                     try: shutil.rmtree(item)
+                     except: pass
+        else:
+            # Si no existe, la creamos ahora mismo
+            try:
+                p.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                st.error(f"Error creando directorio {d}: {e}")
+
+    # 2. Asegurar que TODAS las carpetas existan antes de correr el pipeline
+    # Esto evita el FileNotFoundError 'ops/...'
+    for d in DIRS_TO_MANAGE:
+        (ROOT_DIR / d).mkdir(parents=True, exist_ok=True)
+
+    # 3. Limpiar archivos sueltos en raiz de data si existen
+    try:
+        if (ROOT_DIR / "data" / "dq_report.json").exists(): (ROOT_DIR / "data" / "dq_report.json").unlink()
+        if (ROOT_DIR / "data" / "lineage.jsonl").exists(): (ROOT_DIR / "data" / "lineage.jsonl").unlink()
+    except: pass
     
     st.cache_data.clear()
-    st.toast("Entorno reiniciado. Artefactos eliminados.", icon="🗑️")
+    st.toast("Entorno reiniciado. Estructura lista.", icon="✅")
 
-def simulate_step(step_name, description, duration=1.5):
-    """Ayuda visual para mostrar el progreso al consultor"""
+def simulate_step(step_name, description, duration=1.0):
     with st.spinner(f"Ejecutando: {step_name}..."):
         time.sleep(duration)
         st.write(f"✅ **{step_name}:** {description}")
@@ -63,75 +88,78 @@ def run_pipeline_interactive():
     with placeholder.container():
         st.info("🚀 Iniciando Pipeline de Auditoría Automatizada...")
         
-        # Paso 1: Ingesta
-        simulate_step("MCP Ingest", "Normalizando datos de fuentes heterogéneas (JSON, CSV)...")
-        
-        # Paso 2: Calidad
-        simulate_step("Data Quality Check", "Validando esquemas Pydantic y reglas de negocio...")
-        if (ROOT_DIR / "data" / "dq_report.json").exists():
-            st.json({"status": "DQ_PASSED", "errors": 0}, expanded=False)
+        # Aseguramos directorios justo antes de correr por seguridad
+        for d in DIRS_TO_MANAGE:
+            (ROOT_DIR / d).mkdir(parents=True, exist_ok=True)
 
-        # Paso 3: Semántica
-        simulate_step("SHACL Validation", "Verificando conformidad semántica con grafo ESRS...")
+        # Paso 1
+        simulate_step("MCP Ingest", "Normalizando datos de fuentes heterogéneas...")
         
-        # Paso 4: RAG & AI
-        simulate_step("RAGA AI Engine", "Generando explicaciones y calculando KPIs con LLM...")
+        # Paso 2
+        simulate_step("Data Quality Check", "Validando esquemas Pydantic...")
         
-        # Ejecución real (si existe el script)
+        # Paso 3
+        simulate_step("SHACL Validation", "Verificando conformidad semántica...")
+        
+        # Paso 4
+        simulate_step("RAGA AI Engine", "Generando explicaciones y KPIs...")
+        
+        # Ejecución real
         try:
-            result = subprocess.run(
-                [sys.executable, str(PIPELINE_SCRIPT)],
-                capture_output=True, text=True, check=True
-            )
-            st.code(result.stdout[-500:], language="text", line_numbers=True) # Mostrar últimos logs reales
-        except Exception as e:
-            st.error(f"Error en ejecución real: {e}")
+            if PIPELINE_SCRIPT.exists():
+                # Ejecutamos el script y capturamos la salida
+                result = subprocess.run(
+                    [sys.executable, str(PIPELINE_SCRIPT)],
+                    capture_output=True, text=True, check=True
+                )
+                
+                # Si todo va bien, mostramos logs parciales
+                with st.expander("Ver Logs del Sistema (Stdout)"):
+                    # Mostramos las últimas líneas para confirmar éxito
+                    st.code(result.stdout[-1000:], language="text")
+            else:
+                st.error(f"❌ No se encuentra el script: {PIPELINE_SCRIPT}")
+                
+        except subprocess.CalledProcessError as e:
+            st.error("⚠️ El pipeline falló en la ejecución interna.")
+            st.markdown("**Detalle del error (Stderr):**")
+            st.code(e.stderr, language="text")
+            st.markdown("**Salida parcial (Stdout):**")
+            st.code(e.stdout, language="text")
+            return # Detenemos aquí si falla
 
-        # Paso 5: Gate
-        simulate_step("EEE Gate Decision", "Evaluando umbrales de publicación (Evidencia > 0.8)...")
+        except Exception as e:
+            st.error(f"Error inesperado: {e}")
+            return
+
+        # Paso 5
+        simulate_step("EEE Gate Decision", "Evaluando umbrales de publicación...")
         
-        # Paso 6: Evidencia
-        simulate_step("Merkle Proof", "Generando hash criptográfico de inmutabilidad...", duration=1.0)
+        # Paso 6
+        simulate_step("Merkle Proof", "Generando hash criptográfico...", duration=0.5)
         
         st.success("🏁 Pipeline completado exitosamente.")
         time.sleep(1)
     
-    placeholder.empty() # Limpia el log visual para mostrar el dashboard final
+    placeholder.empty()
 
-# --- Interfaz Streamlit ---
-st.set_page_config(
-    layout="wide",
-    page_title="STEELTRACE™ | Auditor Console",
-    page_icon="🛡️",
-    initial_sidebar_state="expanded"
-)
-
-# Estilos CSS para parecer más profesional
+# --- Estilos CSS ---
 st.markdown("""
 <style>
-    .stMetric {
-        background-color: #f0f2f6;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .stAlert {
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
+    .stMetric { background-color: #f0f2f6; padding: 10px; border-radius: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
+# --- Sidebar ---
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/verified-account.png", width=50)
-    st.title("STEELTRACE™")
+    st.header("🛡️ STEELTRACE™")
     st.caption("CSRD + AI Governance MVP")
     
     st.markdown("---")
-    st.markdown("### 🎮 Controles de Auditoría")
+    st.markdown("### 🎮 Controles")
 
     if st.button("▶️ Ejecutar Auditoría", type="primary", use_container_width=True):
-        reset_environment() # Limpiar antes de correr
+        reset_environment() # Limpia y crea carpetas
         run_pipeline_interactive()
         st.rerun()
 
@@ -140,109 +168,94 @@ with st.sidebar:
         st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📁 Estado del Sistema")
-    
-    # Indicadores de archivo en sidebar
+    # Indicadores
     dq_exists = (ROOT_DIR / "data" / "dq_report.json").exists()
     xbrl_exists = (ROOT_DIR / "xbrl" / "informe.xbrl").exists()
-    
-    st.write(f"Datos Validados: {'✅' if dq_exists else '⚪'}")
-    st.write(f"Reporte XBRL: {'✅' if xbrl_exists else '⚪'}")
+    st.markdown(f"**Estado:**\n- Datos: {'✅' if dq_exists else '⚪'}\n- XBRL: {'✅' if xbrl_exists else '⚪'}")
 
-# Main Content
-st.title("Panel de Control de Conformidad CSRD")
-st.markdown("Vista de Auditoría Técnica y Semántica")
-st.markdown("---")
-
-# Verificar si hay datos
-eee_report = load_json(EEE_REPORT_FILE)
-
-if not eee_report:
-    st.info("👋 **Bienvenido, Auditor.**")
-    st.markdown("""
-    El sistema está en estado de espera. Para iniciar la validación de los datasets de muestra (`data/samples/`), 
-    utilice el botón **▶️ Ejecutar Auditoría** en la barra lateral.
-    
-    **El proceso realizará en tiempo real:**
-    1.  **Ingesta:** Lectura de fuentes crudas.
-    2.  **Validación:** Chequeo contra esquemas Pydantic/JSONSchema.
-    3.  **Lógica:** Inferencia de reglas ESRS (Ontología).
-    4.  **Certificación:** Generación de huella criptográfica.
-    """)
-    
-    # Mostrar datos crudos para que el consultor vea qué va a procesar
-    with st.expander("🔍 Previsualizar Datos de Entrada (Raw Source)"):
-        sample_file = ROOT_DIR / "data" / "samples" / "energy_2024-01.json"
-        if sample_file.exists():
-            st.json(json.loads(sample_file.read_text()), expanded=False)
-        else:
-            st.warning("No se encontraron archivos de muestra.")
-
-else:
-    # --- DASHBOARD RESULTADOS ---
-    
-    # 1. CABECERA DE DECISIÓN (LO MÁS IMPORTANTE PARA EL CONSULTOR)
-    col_main, col_cert = st.columns([3, 1])
-    
-    with col_main:
-        decision = eee_report.get("global_decision", "UNKNOWN")
-        st.subheader(f"Decisión del Algoritmo de Gobernanza:")
-        if decision == "PUBLISH":
-            st.success(f"### ✅ {decision}")
-            st.markdown("El reporte cumple con todos los umbrales de calidad, explicabilidad y evidencia.")
-        else:
-            st.error(f"### ⛔ {decision}")
-            st.markdown("El reporte ha sido bloqueado por inconsistencias o falta de evidencia.")
-
-    with col_cert:
-        st.markdown("#### Sello Digital")
-        # Simular lectura del hash real
-        audit_hash = "Wait..."
-        manifest_path = ROOT_DIR / "evidence" / "evidence_manifest.json"
-        if manifest_path.exists():
-            m = load_json(manifest_path)
-            if m: audit_hash = m.get("merkle_root", "N/A")[:16] + "..."
-            
-        st.code(audit_hash, language="text")
-        st.caption("SHA-256 Merkle Root")
-
+# --- Main Content ---
+try:
+    st.title("Panel de Control de Conformidad CSRD")
+    st.markdown("Vista de Auditoría Técnica y Semántica")
     st.markdown("---")
 
-    # 2. DETALLE PASO A PASO (TABS)
-    tab_dq, tab_sem, tab_xbrl = st.tabs(["1. Calidad del Dato (DQ)", "2. Lógica Semántica (RAG)", "3. Salida Regulatoria (XBRL)"])
+    # Verificar si hay datos
+    eee_report = load_json(EEE_REPORT_FILE)
 
-    with tab_dq:
-        dq = load_json(DQ_REPORT_FILE)
-        if dq:
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Score Calidad", f"{dq.get('dq_score', 0)*100:.1f}%")
-            c2.metric("Reglas Ejecutadas", dq.get("rules_executed", 0))
-            c3.metric("Filas Fallidas", dq.get("failed_rows", 0), delta_color="inverse")
-            
-            st.markdown("#### Detalle por Dominio")
-            st.dataframe(pd.DataFrame(dq.get("domains", {})).T)
-            
-            with st.expander("Ver traza de errores (Log)"):
-                st.json(dq.get("errors", []))
+    if not eee_report:
+        st.info("👋 **Bienvenido, Auditor.**")
+        st.markdown("""
+        El sistema está listo. Pulse **▶️ Ejecutar Auditoría** en el menú lateral.
+        
+        **Procesos a verificar:**
+        1.  Ingesta y Calidad (Pydantic)
+        2.  Lógica Normativa (SHACL/Ontología)
+        3.  Certificación (Hash SHA-256)
+        """)
+        
+        with st.expander("🔍 Ver Datos de Entrada (Raw)"):
+            sample_file = ROOT_DIR / "data" / "samples" / "energy_2024-01.json"
+            if sample_file.exists():
+                st.json(json.loads(sample_file.read_text()), expanded=False)
+            else:
+                st.write("Esperando carga de datos...")
 
-    with tab_sem:
-        st.markdown("#### Razonamiento de la IA (RAG)")
-        expl = load_json(EXPLAIN_FILE)
-        if expl:
-            for k, v in expl.items():
-                st.info(f"**KPI:** {k}")
-                st.write(f"**Hipótesis:** {v.get('hypothesis')}")
-                st.caption(f"Evidencia: {v.get('evidence')}")
-        else:
-            st.warning("No hay explicaciones generadas.")
+    else:
+        # DASHBOARD
+        col_main, col_cert = st.columns([3, 1])
+        
+        with col_main:
+            decision = eee_report.get("global_decision", "UNKNOWN")
+            if decision == "PUBLISH":
+                st.success(f"### ✅ DECISIÓN: {decision}")
+                st.markdown("Cumple umbrales de calidad, explicabilidad y evidencia.")
+            else:
+                st.error(f"### ⛔ DECISIÓN: {decision}")
+                st.markdown("Bloqueado por inconsistencias o falta de evidencia.")
 
-    with tab_xbrl:
-        st.markdown("#### Instancia XBRL Generada")
-        xbrl_file = ROOT_DIR / "xbrl" / "informe.xbrl"
-        if xbrl_file.exists():
-            st.download_button("⬇️ Descargar Paquete XBRL", xbrl_file.read_bytes(), "informe.xbrl")
-            st.code(xbrl_file.read_text()[:1000] + "\n...", language="xml")
-        else:
-            st.error("No se generó el archivo XBRL.")
+        with col_cert:
+            st.markdown("**Sello Digital**")
+            audit_hash = "Generando..."
+            manifest_path = ROOT_DIR / "evidence" / "evidence_manifest.json"
+            if manifest_path.exists():
+                m = load_json(manifest_path)
+                if m: audit_hash = m.get("merkle_root", "N/A")[:10] + "..."
+            st.code(audit_hash)
+            st.caption("Merkle Root SHA-256")
 
-    st.caption(f"ID de Ejecución: {eee_report.get('execution_id', 'N/A')} | Timestamp: {datetime.now().isoformat()}")
+        st.markdown("---")
+
+        tab_dq, tab_sem, tab_xbrl = st.tabs(["1. Calidad (DQ)", "2. Lógica (RAG)", "3. Salida (XBRL)"])
+
+        with tab_dq:
+            dq = load_json(DQ_REPORT_FILE)
+            if dq:
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Score Calidad", f"{dq.get('dq_score', 0)*100:.1f}%")
+                c2.metric("Reglas", dq.get("rules_executed", 0))
+                c3.metric("Fallos", dq.get("failed_rows", 0))
+                st.dataframe(pd.DataFrame(dq.get("domains", {})).T)
+            else:
+                st.warning("No hay reporte de calidad disponible.")
+
+        with tab_sem:
+            expl = load_json(EXPLAIN_FILE)
+            if expl:
+                for k, v in expl.items():
+                    st.info(f"KPI: {k}")
+                    st.write(f"Hipótesis: {v.get('hypothesis')}")
+            else:
+                st.write("Sin explicaciones generadas.")
+
+        with tab_xbrl:
+            xbrl_file = ROOT_DIR / "xbrl" / "informe.xbrl"
+            if xbrl_file.exists():
+                st.download_button("⬇️ Descargar XBRL", xbrl_file.read_bytes(), "informe.xbrl")
+            else:
+                st.warning("Archivo XBRL no generado.")
+
+        st.caption(f"Timestamp: {datetime.now().isoformat()}")
+
+except Exception as e:
+    st.error("⚠️ Error crítico en la aplicación:")
+    st.exception(e)
