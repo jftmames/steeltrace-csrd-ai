@@ -7,9 +7,9 @@ import sys
 import pandas as pd
 import shutil
 import time
-from datetime import datetime
+from datetime import datetime  # <--- CORREGIDO: Importación crítica
 
-# --- 1. CONFIGURACIÓN INICIAL ---
+# --- 1. CONFIGURACIÓN INICIAL (Siempre al principio) ---
 st.set_page_config(
     layout="wide",
     page_title="STEELTRACE™ | Auditor Console",
@@ -17,13 +17,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Configuración de Paths ---
+# --- 2. CONFIGURACIÓN DE ENTORNO Y RUTAS ---
 ROOT_DIR = Path(__file__).parent.resolve()
+
+# Intentar cambiar al directorio raíz para asegurar rutas relativas
 try:
     os.chdir(ROOT_DIR)
 except Exception:
     pass
 
+# Definición de Archivos Clave
 PIPELINE_SCRIPT = ROOT_DIR / "scripts" / "pipeline_run.py"
 DQ_REPORT_FILE  = ROOT_DIR / "data" / "dq_report.json"
 KPI_FILE        = ROOT_DIR / "raga" / "kpis.json"
@@ -32,21 +35,46 @@ SLO_REPORT_FILE = ROOT_DIR / "ops" / "slo_report.json"
 HITL_REPORT_FILE = ROOT_DIR / "ops" / "hitl_kappa.json"
 EXPLAIN_FILE    = ROOT_DIR / "raga" / "explain.json"
 
-# Carpetas que el sistema necesita
-DIRS_TO_MANAGE = ["data/normalized", "ops", "raga", "xbrl", "evidence", "eee", "ontology"]
+# Carpetas que el sistema NECESITA para funcionar
+DIRS_TO_MANAGE = [
+    "data/normalized", 
+    "ops", 
+    "raga", 
+    "xbrl", 
+    "evidence", 
+    "eee", 
+    "ontology"
+]
+
+# --- 3. FUNCIONES DE UTILIDAD BLINDADAS ---
+
+def ensure_directories():
+    """Crea todas las carpetas necesarias al arrancar para evitar FileNotFoundError."""
+    for d in DIRS_TO_MANAGE:
+        path = ROOT_DIR / d
+        try:
+            path.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            # Si falla, no rompemos la app, solo avisamos en consola
+            print(f"Warning creando {d}: {e}")
 
 def load_json(path: Path):
+    """Lee un JSON de forma segura. Si falla, devuelve None sin romper la app."""
     try:
-        if not path.exists(): return None
+        if not path.exists(): 
+            return None
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
-        return None
+        return None  # Silencio absoluto en caso de error de lectura
 
 def reset_environment():
-    """Limpia archivos antiguos para una ejecución limpia."""
+    """Limpia los resultados anteriores para una nueva auditoría."""
+    ensure_directories() # Asegurar que existen antes de limpiar
+    
+    # 1. Limpiar carpetas gestionadas
     for d in DIRS_TO_MANAGE:
         p = ROOT_DIR / d
-        if p.exists() and p.is_dir():
+        if p.exists():
              for item in p.iterdir():
                  if item.is_file() and item.name != ".gitkeep":
                      try: item.unlink()
@@ -54,107 +82,104 @@ def reset_environment():
                  elif item.is_dir():
                      try: shutil.rmtree(item)
                      except: pass
-        else:
-            try: p.mkdir(parents=True, exist_ok=True)
-            except: pass
-
-    # Asegurar creación de carpetas vacías
-    for d in DIRS_TO_MANAGE:
-        (ROOT_DIR / d).mkdir(parents=True, exist_ok=True)
     
-    # Limpieza específica
+    # 2. Limpiar archivos sueltos en raiz de data
     try:
-        if (ROOT_DIR / "data" / "dq_report.json").exists(): (ROOT_DIR / "data" / "dq_report.json").unlink()
+        if (ROOT_DIR / "data" / "dq_report.json").exists(): 
+            (ROOT_DIR / "data" / "dq_report.json").unlink()
     except: pass
     
     st.cache_data.clear()
 
 def simulate_step(step_name, description, duration=0.8):
-    """Muestra progreso visual."""
+    """Muestra progreso visual en la interfaz."""
     with st.spinner(f"Ejecutando: {step_name}..."):
         time.sleep(duration)
-        st.write(f"✅ **{step_name}:** {description}")
+        st.success(f"✅ **{step_name}:** {description}")
 
 def run_pipeline_interactive():
-    """
-    Ejecuta el pipeline y devuelve True solo si tuvo éxito.
-    """
+    """Ejecuta la auditoría y maneja errores del script externo."""
     placeholder = st.empty()
     success = False
     
     with placeholder.container():
         st.info("🚀 Iniciando Pipeline de Auditoría Automatizada...")
         
-        # Simulamos pasos visuales para la demo
+        # Pasos visuales (Simulación UX)
         simulate_step("MCP Ingest", "Normalizando datos de fuentes heterogéneas...")
         simulate_step("Data Quality Check", "Validando esquemas Pydantic...")
         simulate_step("SHACL Validation", "Verificando conformidad semántica...")
         simulate_step("RAGA AI Engine", "Generando explicaciones y KPIs...")
         
-        # --- EJECUCIÓN REAL DEL SCRIPT ---
+        # --- EJECUCIÓN REAL ---
         try:
             if not PIPELINE_SCRIPT.exists():
                 st.error(f"❌ Error Crítico: No se encuentra el script {PIPELINE_SCRIPT}")
                 return False
 
-            # Ejecutamos el script python
+            # Ejecutamos el script python como subproceso
+            # check=True lanzará una excepción si el script falla
             result = subprocess.run(
                 [sys.executable, str(PIPELINE_SCRIPT)],
                 capture_output=True, text=True, check=True
             )
             
-            # Si llega aquí, es que funcionó (exit code 0)
+            # ÉXITO
             st.success("🏁 Pipeline completado exitosamente.")
             
             # Mostrar logs para evidencia técnica
             with st.expander("Ver Logs Técnicos (Stdout)", expanded=False):
-                st.code(result.stdout[-800:], language="text")
+                st.code(result.stdout[-1000:], language="text")
             
             simulate_step("EEE Gate Decision", "Evaluando umbrales de publicación...", duration=0.5)
             simulate_step("Merkle Proof", "Generando hash criptográfico...", duration=0.5)
             
-            time.sleep(1) # Dar tiempo a leer
+            time.sleep(1)
             success = True
 
         except subprocess.CalledProcessError as e:
-            st.error("⚠️ El pipeline falló durante la ejecución.")
-            st.markdown("### Detalle del Error:")
-            st.code(e.stderr, language="bash") # Mostramos el error real
+            # EL SCRIPT FALLÓ (Exit code != 0)
+            st.error("⚠️ El pipeline falló durante la ejecución interna.")
+            st.markdown("### 🔴 Detalle del Error (Stderr):")
+            st.code(e.stderr, language="text") # Mostramos el error real
             st.markdown("### Salida Parcial:")
-            st.code(e.stdout, language="bash")
-            success = False # Marcamos fallo para no recargar
+            st.code(e.stdout, language="text")
+            success = False
 
         except Exception as e:
-            st.error(f"⚠️ Error inesperado: {e}")
+            st.error(f"⚠️ Error inesperado ejecutando pipeline: {e}")
             success = False
             
-    # Solo limpiamos el log visual si hubo éxito para pasar al dashboard
     if success:
-        placeholder.empty()
+        placeholder.empty() # Limpiar consola si todo fue bien
         
     return success
 
-# --- Estilos CSS ---
+# --- 4. AUTOCORRECCIÓN AL INICIO (Soluciona Imagen 1) ---
+ensure_directories()
+
+# --- 5. INTERFAZ DE USUARIO ---
+
+# Estilos CSS
 st.markdown("""
 <style>
     .stMetric { background-color: #f0f2f6; padding: 10px; border-radius: 5px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar ---
+# Sidebar
 with st.sidebar:
     st.header("🛡️ STEELTRACE™")
     st.caption("CSRD + AI Governance MVP")
     st.markdown("---")
     
-    # BOTÓN DE EJECUCIÓN CON LÓGICA CORREGIDA
+    # Botón Ejecutar
     if st.button("▶️ Ejecutar Auditoría", type="primary", use_container_width=True):
         reset_environment()
-        # Solo recargamos la página si run_pipeline devuelve True
         if run_pipeline_interactive():
-            st.rerun()
-        # Si devuelve False, se queda mostrando el error en pantalla
+            st.rerun() # Solo recarga si tuvo éxito
 
+    # Botón Reiniciar
     if st.button("🔄 Reiniciar Entorno", use_container_width=True):
         reset_environment()
         st.rerun()
@@ -164,33 +189,33 @@ with st.sidebar:
     xbrl_exists = (ROOT_DIR / "xbrl" / "informe.xbrl").exists()
     st.markdown(f"**Estado:**\n- Datos: {'✅' if dq_exists else '⚪'}\n- XBRL: {'✅' if xbrl_exists else '⚪'}")
 
-# --- Main Content ---
+# Contenido Principal
 try:
     st.title("Panel de Control de Conformidad CSRD")
     st.markdown("Vista de Auditoría Técnica y Semántica")
     st.markdown("---")
 
+    # Intentar cargar reporte final
     eee_report = load_json(EEE_REPORT_FILE)
 
     if not eee_report:
-        # PANTALLA DE INICIO
+        # PANTALLA DE BIENVENIDA (Estado Inicial)
         st.info("👋 **Bienvenido, Auditor.**")
         st.markdown("""
-        El sistema está listo. Pulse **▶️ Ejecutar Auditoría** en el menú lateral.
-        
-        Si ocurre un error, **los logs aparecerán aquí** en lugar de desaparecer.
+        El sistema está listo y las carpetas de trabajo han sido inicializadas.
+        Pulse **▶️ Ejecutar Auditoría** en el menú lateral para comenzar.
         """)
         
-        # Previsualización de datos
+        # Previsualización segura de datos
         with st.expander("🔍 Ver Datos de Entrada (Raw)"):
             sample_file = ROOT_DIR / "data" / "samples" / "energy_2024-01.json"
             if sample_file.exists():
-                st.json(json.loads(sample_file.read_text()), expanded=False)
+                st.json(load_json(sample_file), expanded=False)
             else:
                 st.warning("⚠️ No se detectan archivos en data/samples/")
 
     else:
-        # DASHBOARD DE RESULTADOS (Solo se ve si todo fue bien)
+        # DASHBOARD DE RESULTADOS (Solo si hay reporte)
         col_main, col_cert = st.columns([3, 1])
         
         with col_main:
@@ -206,9 +231,10 @@ try:
             st.markdown("**Sello Digital**")
             audit_hash = "Generando..."
             manifest_path = ROOT_DIR / "evidence" / "evidence_manifest.json"
-            if manifest_path.exists():
-                m = load_json(manifest_path)
-                if m: audit_hash = m.get("merkle_root", "N/A")[:10] + "..."
+            # Carga segura del manifiesto
+            m = load_json(manifest_path)
+            if m: audit_hash = m.get("merkle_root", "N/A")[:10] + "..."
+            
             st.code(audit_hash)
             st.caption("Merkle Root SHA-256")
 
@@ -246,5 +272,6 @@ try:
         st.caption(f"Timestamp: {datetime.now().isoformat()}")
 
 except Exception as e:
+    # Captura final de errores para que no salga la pantalla fea de Streamlit
     st.error("⚠️ Error crítico en la aplicación:")
     st.exception(e)
