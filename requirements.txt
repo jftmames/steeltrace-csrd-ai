@@ -1,8 +1,21 @@
-jsonschema
+# DATA & VALIDATION
 pandas
+pydantic          # Reemplazo robusto para validación de estructuras
+duckdb            # Base de datos SQL local (en memoria/archivo)
+ydata-profiling   # Informes de calidad de datos automáticos
+
+# SEMANTICS (Tu base actual es buena)
 rdflib
 pyshacl
-lxml
-scikit-learn
-pyyaml
+
+# AI & RAG (Mejora significativa gratis)
+chromadb          # Base de datos vectorial local
+sentence-transformers # Para crear embeddings gratis en local (HuggingFace)
+langchain-community
+
+# REPORTING & XBRL
+arelle-release    # Librería estándar Open Source para XBRL
+lxml              # Auxiliar para XML
+
+# UI
 streamlit
