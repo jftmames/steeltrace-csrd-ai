@@ -1,21 +1,12 @@
-# DATA & VALIDATION
+streamlit
 pandas
-pydantic          # Reemplazo robusto para validación de estructuras
-duckdb            # Base de datos SQL local (en memoria/archivo)
-ydata-profiling   # Informes de calidad de datos automáticos
-
-# SEMANTICS (Tu base actual es buena)
+pydantic
+chromadb
+sentence-transformers
+pysqlite3-binary  # CRÍTICO: Parche para que ChromaDB funcione en la nube
 rdflib
 pyshacl
-
-# AI & RAG (Mejora significativa gratis)
-chromadb          # Base de datos vectorial local
-sentence-transformers # Para crear embeddings gratis en local (HuggingFace)
-langchain-community
-
-# REPORTING & XBRL
-arelle-release    # Librería estándar Open Source para XBRL
-lxml              # Auxiliar para XML
-
-# UI
-streamlit
+ydata-profiling
+streamlit-pandas-profiling
+lxml
+openpyxl
