@@ -1,3 +1,4 @@
+
 import streamlit as st
 import json
 from pathlib import Path
@@ -7,6 +8,7 @@ import sys
 import pandas as pd
 from datetime import datetime
 import shutil
+import tempfile
 
 # --- Configuración de Paths ---
 ROOT_DIR = Path(__file__).parent.resolve()
@@ -38,15 +40,6 @@ def reset_environment():
             # No borramos la carpeta entera si contiene inputs fijos,
             # pero en este repo 'data' tiene 'samples' que son inputs.
             # Mejor borramos solo archivos generados conocidos o subcarpetas generadas.
-            # Para simplificar el MVP:
-            # - data/normalized: borrar
-            # - data/dq_report.json, lineage.jsonl: borrar
-            # - ops/*: borrar
-            # - raga/*: borrar
-            # - xbrl/*: borrar (menos schema)
-            # - evidence/*: borrar
-            # - eee/*: borrar
-            # - ontology/validation.log, linaje.ttl: borrar
             pass
 
     # Borrado selectivo para no perder inputs
