@@ -47,6 +47,11 @@ This MVP showcases a fully automated pipeline that ingests raw enterprise data, 
     streamlit run app.py
     ```
 
+La interfaz se divide ahora en **mini-aplicaciones Streamlit** (pestañas en la barra lateral) para ver paso a paso cada
+componente del pipeline: ingesta+DQ, validación SHACL, RAGA, gate EEE, XBRL y evidencias.
+
+> ¿Quieres saber qué expone cada pestaña? Consulta la guía detallada en `docs/multipage_walkthrough.md`.
+
 ---
 
 ## 🏗️ Architecture
